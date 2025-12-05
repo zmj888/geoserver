@@ -5,6 +5,7 @@
  */
 package org.geoserver.ows.kvp;
 
+import org.apache.commons.codec.binary.Base32;
 import java.util.List;
 import org.geoserver.ows.KvpParser;
 import org.geoserver.platform.ServiceException;
@@ -23,8 +24,16 @@ public class CQLFilterKvpParser extends KvpParser {
 
     @Override
     public Object parse(String value) throws Exception {
+        String realValue = value;
         try {
-            if (value == null || value.isEmpty()) {
+            Base32 base32 = new Base32();
+            realValue = new String(base32.decode(value));
+        } catch (IllegalArgumentException e) {
+            realValue = value;
+        }
+
+        try {
+            if (realValue == null || realValue.isEmpty()) {
                 return null;
             }
             return XCQL.toFilterList(value);
